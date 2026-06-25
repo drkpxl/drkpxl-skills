@@ -1,0 +1,8 @@
+# Hermes — Tiny Air config
+# Paste this into your Hermes config.yaml (hosted MCP, no local process needed)
+
+mcp_servers:
+  tinyair:
+    url: "https://air.drkpxl.com/mcp"
+    tools:
+      include: [get_air_quality, check_air_quality_threshold, find_nearby_stations, list_aqi_categories]
