@@ -1,76 +1,39 @@
-# drkpxl-skills — Tiny Air
+# drkpxl-skills
 
-Agent-installable artifacts for [Tiny Air](https://tinyair.drkpxl.com): a hosted MCP
-server that gives your AI agent real-time US air quality data. Ask about AQI, smoke,
-or set up proactive alerts when conditions worsen — all via a single hosted endpoint.
-
-**Hosted MCP endpoint:** `https://air.drkpxl.com/mcp` (Streamable HTTP, stateless, no API key required)
+Installable skills for AI agents, by drkpxl. Each skill is a self-contained directory
+under `skills/` that you can clone and drop into your agent's skill folder — no build
+step, no API keys (unless noted), no backend to run.
 
 ---
 
-## What Tiny Air does
+## Available skills
 
-Tiny Air is agent-first. It exposes four tools over a hosted MCP server so your agent
-can look up air quality, compare against thresholds, find monitoring stations, and
-understand the AQI scale — without any backend setup on your end.
-
-| Tool | What it does |
-|---|---|
-| `get_air_quality` | Current AQI for a US zip, city, or lat/lon |
-| `check_air_quality_threshold` | Returns `exceeded: true/false` against a `max_aqi` or `min_category` |
-| `find_nearby_stations` | Monitoring stations near a location |
-| `list_aqi_categories` | The Good → Hazardous AQI band definitions |
-
-Coverage is **US-only** (data source: AirNow.gov; US geocoding).
-
----
-
-## Install by agent
-
-| Agent | Config file | What it does |
+| Skill | Path | Description |
 |---|---|---|
-| Claude Code | [configs/claude-code.md](configs/claude-code.md) | `claude mcp add` command + Skill install |
-| Hermes | [configs/hermes.yaml](configs/hermes.yaml) | `config.yaml` snippet (hosted, no local process) |
-| OpenClaw | [configs/openclaw.json](configs/openclaw.json) | `~/.openclaw/openclaw.json` snippet |
-| Claude Desktop / Cursor | [configs/claude-desktop.json](configs/claude-desktop.json) | `claude_desktop_config.json` via `mcp-remote` |
-| Any HTTP MCP client | [configs/generic.md](configs/generic.md) | POST to `https://air.drkpxl.com/mcp` |
+| **Tiny Air** | [`skills/tiny-air/`](skills/tiny-air/) | Real-time US air quality (AQI) via a hosted MCP server. Ask about smoke, set proactive alerts, or query by ZIP / city / coordinates. |
 
 ---
 
-## Install the Agent Skill (Claude Code)
+## Repo conventions
 
-The Skill file in `skills/tiny-air/SKILL.md` teaches Claude Code how to answer
-air-quality questions and own the proactive-alert loop without extra prompting.
+Each skill lives in `skills/<name>/` and contains:
+
+| File / folder | Purpose |
+|---|---|
+| `SKILL.md` | The skill definition loaded by the agent (e.g., Claude Code's `~/.claude/skills/`) |
+| `README.md` | Install instructions, per-agent config table, usage details |
+| `configs/` | Per-agent config snippets (one file per agent type) |
+| `recipes/` | Canonical prompt recipes and scheduling patterns |
+
+To install a skill into Claude Code:
 
 ```bash
 git clone https://github.com/drkpxl/drkpxl-skills.git
-cp -r drkpxl-skills/skills/tiny-air ~/.claude/skills/tiny-air
+cp -r drkpxl-skills/skills/<name> ~/.claude/skills/<name>
 ```
 
-The MCP server must also be added:
-
-```bash
-claude mcp add --transport http tinyair https://air.drkpxl.com/mcp
-```
+See each skill's `README.md` for agent-specific instructions and MCP server setup.
 
 ---
 
-## Proactive alerts
-
-Tiny Air is stateless — your agent owns alerting. See
-[recipes/proactive-alerts.md](recipes/proactive-alerts.md) for two canonical recipes
-(numeric-threshold with suppression, and daily category-threshold check) plus
-per-agent scheduling notes for Hermes, OpenClaw, and Claude Code / Desktop.
-
----
-
-## Coverage and attribution
-
-- **US-only.** Air quality data is sourced from [AirNow.gov](https://www.airnow.gov/),
-  the US EPA's official real-time air quality reporting network. Geocoding is US-only.
-- **Powered by Tiny Air** — see [tinyair.drkpxl.com](https://tinyair.drkpxl.com) for
-  the web app, source attribution, and documentation.
-
----
-
-[tinyair.drkpxl.com](https://tinyair.drkpxl.com) · [github.com/drkpxl/drkpxl-skills](https://github.com/drkpxl/drkpxl-skills)
+[github.com/drkpxl/drkpxl-skills](https://github.com/drkpxl/drkpxl-skills)
