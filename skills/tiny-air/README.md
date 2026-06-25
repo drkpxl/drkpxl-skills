@@ -1,6 +1,6 @@
 # Tiny Air — air quality skill for AI agents
 
-[Tiny Air](https://tinyair.drkpxl.com) is a hosted MCP server that gives your AI agent
+[Tiny Air](https://air.drkpxl.com) is a hosted MCP server that gives your AI agent
 real-time US air quality data. Ask about AQI, smoke, or set up proactive alerts when
 conditions worsen — all via a single hosted endpoint, no API key required.
 
@@ -69,9 +69,9 @@ per-agent scheduling notes for Hermes, OpenClaw, and Claude Code / Desktop.
 
 - **US-only.** Air quality data is sourced from [AirNow.gov](https://www.airnow.gov/),
   the US EPA's official real-time air quality reporting network. Geocoding is US-only.
-- **Powered by Tiny Air** — see [tinyair.drkpxl.com](https://tinyair.drkpxl.com) for
+- **Powered by Tiny Air** — see [air.drkpxl.com](https://tinyair.drkpxl.com) for
   the web app, source attribution, and documentation.
 
 ---
 
-[tinyair.drkpxl.com](https://tinyair.drkpxl.com) · [github.com/drkpxl/drkpxl-skills](https://github.com/drkpxl/drkpxl-skills)
+[air.drkpxl.com](https://air.drkpxl.com) · [github.com/drkpxl/drkpxl-skills](https://github.com/drkpxl/drkpxl-skills)
