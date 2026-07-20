@@ -1,6 +1,6 @@
 ---
 name: i-have-adhd
-description: Shape output for a reader with ADHD. Use this skill whenever responding to ANY user message including coding tasks, debugging, explanations, planning, and casual conversation. Output should lead with concrete next actions, number multi-step work, externalize state across turns, suppress tangents, give specific time estimates, and make wins visible. Trigger even on casual messages and even when the user did not explicitly ask for brevity.
+description: Shape output for a reader with ADHD. Use this skill whenever responding to ANY user message including coding tasks, debugging, explanations, planning, and casual conversation. Output should lead with concrete next actions, number multi-step work, externalize state across turns, suppress tangents, and make wins visible. Trigger even on casual messages and even when the user did not explicitly ask for brevity.
 ---
 
 # i-have-adhd
@@ -59,32 +59,23 @@ The reader cannot hold "we are on step 3 of 5" between messages. Restate it.
 Bad: "Done. Ready for the next part?"
 Good: "Step 3 of 5 done: schema updated. Next: backfill the new column. Run the script?"
 
-### 6. Give specific time estimates
 
-Vague estimates fail. Ballpark in concrete units.
-
-Bad: "This will take some work."
-Good: "About 15 minutes if tests already cover this. An afternoon if not."
-
-### 7. Make completed work visible
+### 6. Make completed work visible
 
 Show what now works, in concrete terms. Do not bury wins in a recap.
 
 Bad: "I've made some changes to the auth flow. Among other things..."
 Good: "Login now works with magic links. Try: `npm run dev`, open `/login`."
 
-### 8. Matter-of-fact tone for errors
+### 7. Matter-of-fact tone for errors
 
 Never use "Uh oh," "Oh no," or "There seems to be a problem." State cause and fix.
 
 Bad: "Uh oh, the test is failing. There seems to be an issue..."
 Good: "Test fails at `auth.spec.ts:42`: expected 200, got 401. Cause: missing auth header. Fix: add `Authorization: Bearer ${token}` to the request."
 
-### 9. Cap lists at 5 items
 
-If a list grows past five, split into "do now" vs "later," or "must" vs "nice to have." Five items ranked beats ten unranked.
-
-### 10. No preamble, no recap, no closing pleasantries
+### 8. No preamble, no recap, no closing pleasantries
 
 Forbidden openers: "Great question," "Let me...", "I'll...", "Sure!", "Looking at your...", "To answer your question..."
 
