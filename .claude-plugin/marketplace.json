@@ -1,0 +1,41 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "drkpxl-skills",
+  "description": "Installable skills for AI agents, by drkpxl. Copywriting, ADHD-friendly output shaping, and real-time US air quality.",
+  "owner": {
+    "name": "Steven Hubert",
+    "email": "steven@drkpxl.com"
+  },
+  "plugins": [
+    {
+      "name": "copywriting",
+      "source": "./",
+      "skills": ["./skills/copywriting"],
+      "description": "Conversion copywriting for website pages (homepage, landing, pricing, feature, about). Finds where the copy lives and edits it in place.",
+      "category": "writing",
+      "license": "MIT",
+      "repository": "https://github.com/drkpxl/drkpxl-skills",
+      "keywords": ["copywriting", "marketing", "landing-page", "conversion"]
+    },
+    {
+      "name": "i-have-adhd",
+      "source": "./",
+      "skills": ["./skills/i-have-adhd"],
+      "description": "Shape output for an ADHD reader: lead with the next action, number steps, restate state, suppress tangents, make wins visible. Forked from ayghri/i-have-adhd.",
+      "category": "productivity",
+      "license": "MIT",
+      "repository": "https://github.com/drkpxl/drkpxl-skills",
+      "keywords": ["adhd", "output-style", "productivity", "accessibility"]
+    },
+    {
+      "name": "tiny-air",
+      "source": "./",
+      "skills": ["./skills/tiny-air"],
+      "description": "Real-time US air quality (AQI) via a hosted MCP server. Ask about smoke, set proactive alerts, or query by ZIP / city / coordinates.",
+      "category": "utilities",
+      "license": "MIT",
+      "repository": "https://github.com/drkpxl/drkpxl-skills",
+      "keywords": ["air-quality", "aqi", "weather", "mcp"]
+    }
+  ]
+}

@@ -11,6 +11,7 @@ step, no API keys (unless noted), no backend to run.
 | Skill | Path | Description |
 |---|---|---|
 | **Copywriting** | [`skills/copywriting/`](skills/copywriting/) | Conversion copywriting for website pages (homepage, landing, pricing, feature, about). Finds where the copy lives and edits it in place — no copy dumped into chat. |
+| **I Have ADHD** | [`skills/i-have-adhd/`](skills/i-have-adhd/) | Shapes every response for an ADHD reader: lead with the next action, number steps, restate state each turn, suppress tangents, make wins visible. Forked from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT). |
 | **Tiny Air** | [`skills/tiny-air/`](skills/tiny-air/) | Real-time US air quality (AQI) via a hosted MCP server. Ask about smoke, set proactive alerts, or query by ZIP / city / coordinates. |
 
 ---
@@ -31,7 +32,18 @@ Only `SKILL.md` is required. Pure-prompt skills (like Copywriting) ship just `SK
 an optional `README.md`, and any `references/`; MCP/server skills (like Tiny Air) add
 `configs/` and `recipes/`.
 
-To install a skill into Claude Code:
+## Install in Claude Code
+
+This repo is a Claude Code plugin marketplace — each skill installs as its own plugin:
+
+```
+/plugin marketplace add drkpxl/drkpxl-skills
+/plugin install copywriting@drkpxl-skills
+/plugin install i-have-adhd@drkpxl-skills
+/plugin install tiny-air@drkpxl-skills
+```
+
+Or manually, by copying a skill into your personal skills folder:
 
 ```bash
 git clone https://github.com/drkpxl/drkpxl-skills.git
