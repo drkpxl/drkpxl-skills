@@ -10,8 +10,8 @@ step, no API keys (unless noted), no backend to run.
 
 | Skill | Path | Description |
 |---|---|---|
+| **Bro** | [`skills/bro/`](skills/bro/) | Restates the agent's last message in plain human language, with no jargon. Manual invocation only — you decide when an answer needed translating. |
 | **Copywriting** | [`skills/copywriting/`](skills/copywriting/) | Conversion copywriting for website pages (homepage, landing, pricing, feature, about). Finds where the copy lives and edits it in place — no copy dumped into chat. |
-| **I Have ADHD** | [`skills/i-have-adhd/`](skills/i-have-adhd/) | Shapes every response for an ADHD reader: lead with the next action, number steps, restate state each turn, suppress tangents, make wins visible. Forked from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT). |
 | **Tiny Air** | [`skills/tiny-air/`](skills/tiny-air/) | Real-time US air quality (AQI) via a hosted MCP server. Ask about smoke, set proactive alerts, or query by ZIP / city / coordinates. |
 
 ---
@@ -38,8 +38,8 @@ This repo is a Claude Code plugin marketplace — each skill installs as its own
 
 ```
 /plugin marketplace add drkpxl/drkpxl-skills
+/plugin install bro@drkpxl-skills
 /plugin install copywriting@drkpxl-skills
-/plugin install i-have-adhd@drkpxl-skills
 /plugin install tiny-air@drkpxl-skills
 ```
 
