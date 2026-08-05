@@ -30,6 +30,28 @@
       "keywords": ["copywriting", "marketing", "landing-page", "conversion"]
     },
     {
+      "name": "prototype",
+      "source": "./",
+      "skills": ["./skills/prototype"],
+      "description": "Build a throwaway prototype to answer a design question: a single shareable HTML file for state/logic, or several toggleable UI variants on one route.",
+      "version": "1.0.0",
+      "category": "engineering",
+      "license": "MIT",
+      "repository": "https://github.com/drkpxl/drkpxl-skills",
+      "keywords": ["prototype", "state-machine", "ui-variants", "design"]
+    },
+    {
+      "name": "research",
+      "source": "./",
+      "skills": ["./skills/research"],
+      "description": "Investigate a question against high-trust primary sources and capture cited findings as a Markdown file, run as a background agent.",
+      "version": "1.0.0",
+      "category": "engineering",
+      "license": "MIT",
+      "repository": "https://github.com/drkpxl/drkpxl-skills",
+      "keywords": ["research", "primary-sources", "citations", "background-agent"]
+    },
+    {
       "name": "tiny-air",
       "source": "./",
       "skills": ["./skills/tiny-air"],

@@ -1,6 +1,11 @@
 ---
 name: copywriting
 description: Use when writing, rewriting, or improving marketing copy for a website page — homepage, landing page, pricing, feature, about, or product pages. Triggers include "write copy for," "improve this copy," "rewrite this page," "marketing copy," "headline help," "subheadline," "hero section copy," "above the fold," "CTA copy," "value proposition," "tagline," "this copy is weak," or "make this more compelling." Use whenever someone is working on website text that needs to persuade or convert.
+license: MIT
+metadata:
+  hermes:
+    category: writing
+    tags: [copywriting, marketing, landing-page, conversion]
 ---
 
 # Copywriting
