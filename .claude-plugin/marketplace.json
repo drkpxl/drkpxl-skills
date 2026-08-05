@@ -1,12 +1,22 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "drkpxl-skills",
-  "description": "Installable skills for AI agents, by drkpxl. Copywriting, ADHD-friendly output shaping, and real-time US air quality.",
+  "description": "Installable skills for AI agents, by drkpxl. Copywriting, plain-language restatement, and real-time US air quality.",
   "owner": {
     "name": "Steven Hubert",
     "email": "steven@drkpxl.com"
   },
   "plugins": [
+    {
+      "name": "bro",
+      "source": "./",
+      "skills": ["./skills/bro"],
+      "description": "Restate the agent's last message in plain human language, with no jargon. Manual invocation only (/bro).",
+      "category": "communication",
+      "license": "MIT",
+      "repository": "https://github.com/drkpxl/drkpxl-skills",
+      "keywords": ["plain-language", "jargon", "clarity", "output-style"]
+    },
     {
       "name": "copywriting",
       "source": "./",
@@ -16,16 +26,6 @@
       "license": "MIT",
       "repository": "https://github.com/drkpxl/drkpxl-skills",
       "keywords": ["copywriting", "marketing", "landing-page", "conversion"]
-    },
-    {
-      "name": "i-have-adhd",
-      "source": "./",
-      "skills": ["./skills/i-have-adhd"],
-      "description": "Shape output for an ADHD reader: lead with the next action, number steps, restate state, suppress tangents, make wins visible. Forked from ayghri/i-have-adhd.",
-      "category": "productivity",
-      "license": "MIT",
-      "repository": "https://github.com/drkpxl/drkpxl-skills",
-      "keywords": ["adhd", "output-style", "productivity", "accessibility"]
     },
     {
       "name": "tiny-air",
