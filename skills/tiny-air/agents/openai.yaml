@@ -1,0 +1,3 @@
+interface:
+  display_name: "Tiny Air"
+  short_description: "Real-time US air quality (AQI)"

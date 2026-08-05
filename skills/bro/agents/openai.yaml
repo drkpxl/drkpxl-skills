@@ -1,0 +1,5 @@
+interface:
+  display_name: "Bro"
+  short_description: "Say that again, in plain English"
+policy:
+  allow_implicit_invocation: false

@@ -1,6 +1,11 @@
 ---
 name: tiny-air
 description: Check US air quality (AQI) for any zip, city, or coordinates via the Tiny Air MCP server, and set up proactive "alert me when the air is bad" behavior. Use when the user asks about air quality, smoke, AQI, or wants to be warned when conditions worsen.
+license: MIT
+metadata:
+  hermes:
+    category: utilities
+    tags: [air-quality, aqi, weather, mcp]
 ---
 
 # Tiny Air — air quality for your agent
