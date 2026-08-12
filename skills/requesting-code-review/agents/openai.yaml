@@ -1,0 +1,3 @@
+interface:
+  display_name: "Requesting Code Review"
+  short_description: "Pre-commit verify: scan, test, review, fix"

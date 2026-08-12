@@ -13,6 +13,7 @@ step, no API keys (unless noted), no backend to run.
 | **Bro** | [`skills/bro/`](skills/bro/) | Restates the agent's last message in plain human language, with no jargon. Manual invocation only — you decide when an answer needed translating. |
 | **Copywriting** | [`skills/copywriting/`](skills/copywriting/) | Conversion copywriting for website pages (homepage, landing, pricing, feature, about). Finds where the copy lives and edits it in place — no copy dumped into chat. |
 | **Prototype** | [`skills/prototype/`](skills/prototype/) | Throwaway code that answers one design question: a single shareable HTML file for state/logic, or several toggleable UI variants on one route. Forked from [mattpocock/skills](https://github.com/mattpocock/skills). |
+| **Requesting Code Review** | [`skills/requesting-code-review/`](skills/requesting-code-review/) | Pre-commit verification pipeline: static security scan, regression-checked tests and lint, an independent reviewer subagent with no tools, and a bounded auto-fix loop. Hardened so small models can run it without wrecking anything. |
 | **Research** | [`skills/research/`](skills/research/) | Delegates a question to a background agent that reads primary sources and leaves cited findings in a Markdown file. Forked from [mattpocock/skills](https://github.com/mattpocock/skills). |
 | **Tiny Air** | [`skills/tiny-air/`](skills/tiny-air/) | Real-time US air quality (AQI) via a hosted MCP server. Ask about smoke, set proactive alerts, or query by ZIP / city / coordinates. |
 
@@ -58,6 +59,7 @@ This repo is a Claude Code plugin marketplace — each skill installs as its own
 /plugin install bro@drkpxl-skills
 /plugin install copywriting@drkpxl-skills
 /plugin install prototype@drkpxl-skills
+/plugin install requesting-code-review@drkpxl-skills
 /plugin install research@drkpxl-skills
 /plugin install tiny-air@drkpxl-skills
 ```
