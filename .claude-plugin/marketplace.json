@@ -41,6 +41,17 @@
       "keywords": ["prototype", "state-machine", "ui-variants", "design"]
     },
     {
+      "name": "requesting-code-review",
+      "source": "./",
+      "skills": ["./skills/requesting-code-review"],
+      "description": "Pre-commit verification pipeline: static security scan, regression-checked tests and lint, an independent reviewer subagent, and a bounded auto-fix loop. Hardened for small models.",
+      "version": "3.0.0",
+      "category": "engineering",
+      "license": "MIT",
+      "repository": "https://github.com/drkpxl/drkpxl-skills",
+      "keywords": ["code-review", "security", "pre-commit", "verification", "auto-fix"]
+    },
+    {
       "name": "research",
       "source": "./",
       "skills": ["./skills/research"],
