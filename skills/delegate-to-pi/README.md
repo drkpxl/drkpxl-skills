@@ -30,6 +30,54 @@ The prompt pi sees is not a greenfield spec. It is eight headings, in order:
 
 Pi's standing brief says: implement from the packet, do not rediscover the repo.
 
+### Example packet
+
+Mid-session FastAPI invoice API, user said "delegate to pi: add CSV export":
+
+```markdown
+# Goal
+Add GET /invoices/export.csv that returns every invoice as CSV.
+
+# Done when
+1. GET /invoices/export.csv returns HTTP 200 and Content-Type text/csv.
+2. First body line is exactly `id,customer_id,amount_cents,status`.
+3. One data row per invoice from `list_invoices()`, same column order.
+4. Empty `list_invoices()` still returns 200 with only the header row.
+5. GET /invoices/export.csv is not captured by GET /invoices/{id}.
+6. `python -m pytest -q` exits 0, including tests for 1–5.
+7. No new third-party dependencies. `src/invoice/models.py` is unchanged.
+
+# Already decided
+- Path: GET /invoices/export.csv
+- Columns: id, customer_id, amount_cents, status
+- Data source: existing `list_invoices()`
+- No new dependencies
+- Do not touch `src/invoice/models.py`
+
+# Map
+- `src/invoice/api.py` — POST /invoices, GET /invoices/{id}. Add export here. Copy GET /invoices/{id} (same app object; `HTTPException` 404 stays on by-id).
+- `src/invoice/models.py` — pydantic v2 `Invoice`: id, customer_id, amount_cents, status. Read-only.
+- `src/invoice/db.py` — `list_invoices()` already returns all invoices. Call it; do not change it.
+
+# Layout
+- Edit `src/invoice/api.py` — add the export route.
+- Add or extend pytest coverage for the new route.
+
+# Constraints
+- Allowed paths: `src/invoice/api.py`, existing tests
+- Do not touch: `src/invoice/models.py`, `src/invoice/db.py`
+- Dependencies: stdlib `csv` plus the FastAPI/pydantic stack already here
+
+# Verify
+python -m pytest -q
+
+# Out of scope
+- Auth, filters, pagination, extra columns
+- Changing POST /invoices or GET /invoices/{id}
+- Rewriting `db.py`
+```
+
+
 ---
 
 ## How it works
