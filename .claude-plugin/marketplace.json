@@ -34,7 +34,7 @@
       "source": "./",
       "skills": ["./skills/delegate-to-pi"],
       "description": "Hand a closed packet to the pi CLI agent — pi executes from your file map and decisions, you verify.",
-      "version": "3.0.0",
+      "version": "3.1.0",
       "category": "engineering",
       "license": "MIT",
       "repository": "https://github.com/drkpxl/drkpxl-skills",
