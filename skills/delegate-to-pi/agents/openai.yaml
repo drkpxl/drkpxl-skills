@@ -1,0 +1,3 @@
+interface:
+  display_name: "Delegate to pi"
+  short_description: "Hand pi a closed packet, then verify it yourself"

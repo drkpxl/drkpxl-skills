@@ -30,6 +30,17 @@
       "keywords": ["copywriting", "marketing", "landing-page", "conversion"]
     },
     {
+      "name": "delegate-to-pi",
+      "source": "./",
+      "skills": ["./skills/delegate-to-pi"],
+      "description": "Hand a closed packet to the pi CLI agent — pi executes from your file map and decisions, you verify.",
+      "version": "3.0.0",
+      "category": "engineering",
+      "license": "MIT",
+      "repository": "https://github.com/drkpxl/drkpxl-skills",
+      "keywords": ["code-generation", "delegation", "orchestrator-worker", "handoff", "pi", "ollama"]
+    },
+    {
       "name": "prototype",
       "source": "./",
       "skills": ["./skills/prototype"],
