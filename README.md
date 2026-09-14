@@ -17,6 +17,7 @@ step, no API keys (unless noted), no backend to run.
 | **Requesting Code Review** | [`skills/requesting-code-review/`](skills/requesting-code-review/) | Pre-commit verification pipeline: static security scan, regression-checked tests and lint, an independent reviewer subagent with no tools, and a bounded auto-fix loop. Hardened so small models can run it without wrecking anything. |
 | **Research** | [`skills/research/`](skills/research/) | Delegates a question to a background agent that reads primary sources and leaves cited findings in a Markdown file. Forked from [mattpocock/skills](https://github.com/mattpocock/skills). |
 | **Tiny Air** | [`skills/tiny-air/`](skills/tiny-air/) | Real-time US air quality (AQI) via a hosted MCP server. Ask about smoke, set proactive alerts, or query by ZIP / city / coordinates. |
+| **Morning Briefing** | [`skills/morning-briefing/`](skills/morning-briefing/) | A personal daily newspaper — weather, calendar, AQI, curated news with QR codes, newsletter summaries, and a joke. Renders a single 8.5×11 newsprint page and prints it every morning. |
 
 ---
 
