@@ -183,7 +183,7 @@ See `references/onboarding.md` for the full interactive onboarding flow.
 
 7. **Each section renders or renders its error.** No blank spaces.
 
-8. **QR codes use base64 data URIs.** Embed as `data:image/png;base64,...` in the `<img src="...">`.
+8. **QR codes use base64 data URIs.** Embed as `data:image/png;base64,...` in the `<img src="...">`. Minimum rendered size: lead story 50px, grid cards 45px, newsletter 45px. Smaller than 45px won't scan reliably when printed.
 
 9. **Gmail newsletter scanning needs Python 3.10+.** Run `google_api.py` with `~/.hermes/hermes-agent/venv/bin/python3`.
 
