@@ -113,7 +113,7 @@ Two image processing steps, both done via throwaway Python scripts written to `/
 
 Assemble the complete HTML page with all data, QR codes, and radar image embedded as base64 data URIs. Write it to `/tmp/briefing.html` using `write_file`.
 
-The page uses the design spec in `references/layout-spec.md` and the template structure in `templates/briefing.html`. Key rules:
+**CRITICAL: Copy the CSS stylesheet from `references/design-system.md` verbatim into the `<style>` block.** Do not modify font sizes, QR code sizes, colors, or layout rules. The design system is a complete stylesheet — paste it as-is and fill in the content. The agent controls the content (which changes every run), not the design (which is fixed). If the QR codes are smaller than 45px they won't scan when printed.
 
 1. **Layout uses real HTML `<table>` elements** — not CSS flexbox (PDF renderer doesn't support flexbox).
 2. **Weather + Calendar share one section** — three weather columns in a table row, calendar nested below in the left cell, color radar in the right cell spanning both.
