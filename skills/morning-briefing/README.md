@@ -30,6 +30,7 @@ A personal daily newspaper for AI agents. Every morning, the agent gathers weath
 - **Network printer** accessible via CUPS (`lp` command)
 - **WeasyPrint** (`pip install weasyprint`) + pango/glib (`brew install pango glib` on macOS)
 - **qrcode** (`pip install qrcode[pil]`)
+- **Pillow** (`pip install Pillow`) — for radar image processing
 - **Gmail connector** (optional — for newsletter scanning)
 - **xAI OAuth** (optional — for X/Twitter search)
 - **Tailscale or Cloudflare Tunnel** (optional — for QR-coded overflow pages)
