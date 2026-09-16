@@ -79,20 +79,22 @@ Each source is independent. If one fails, attempt one self-healing retry, then r
 
 **Air quality** — `ha_get_state` for the AQI sensor. Extract: AQI value, category, PM2.5, PM10, O3. Alternatively, use tinyair MCP tools if HA sensor is unavailable.
 
-**News** — This is the curation step, the core value of the briefing.
+**News** — This is the curation step, the core value of the briefing. HARD RULE: every story must have happened or been first reported within the last 36 hours. This is a daily newspaper, not a weekly digest. A story with no verifiable publication date in the last 36 hours is cut — no exceptions, no matter how relevant the topic is.
+
 1. For each topic in the interest profile, run targeted searches:
-   - `x_search` for X/Twitter discussion (last 24h)
-   - `web_search` for Hacker News and Reddit (last 24h)
-2. Score each candidate item against the interest profile — does this match what the user actually cares about within this topic?
-3. Rank by relevance + signal strength. Discard noise.
-4. Select the top N items that will fit in the news section.
-5. For each selected item: write a 1-2 sentence summary with source attribution.
+   - `x_search` with explicit `from_date`/`to_date` parameters set to the last 36 hours
+   - `web_search` with the current date and "past 24 hours" terms in the query (e.g., "yesterday" or today's date)
+2. For EVERY candidate item, determine its publication date from the search result metadata or the source page. If the date is older than 36 hours, DISCARD IT — do not include it, do not "round up" relevance.
+3. If a topic yields nothing in the last 36 hours, that topic gets no stories this run. Render the section with fewer items or skip that topic — a thin news day is honest; stale news is not.
+4. Score remaining candidates against the interest profile, rank by relevance + signal strength, discard noise.
+5. Select the top N items that will fit in the news section.
+6. For each selected item: write a 1-2 sentence summary with source attribution INCLUDING THE DATE (e.g., "Sep 16 — ...").
+
+**Verification before rendering:** re-check every selected story's date. If you cannot state when each story was published, you have not verified it — cut it. The date printed in each source attribution is the receipt.
 
 **Newsletters** — If Gmail is available and newsletter senders are configured:
-1. Search Gmail for emails from configured newsletter senders received in the last 24h.
-2. Extract the sections matching the user's interest profile.
-3. Summarize each matching section in 1-2 sentences with the newsletter name.
-4. Note non-matching sections: "Also in [newsletter]: [topics]."
+1. Search Gmail using the sender's DOMAIN, not the full email address — senders change delivery addresses (e.g., Morning Brew has sent from both `morningbrew@mail.sailthru.com` and `crew@morningbrew.com`). Search: `~/.hermes/hermes-agent/venv/bin/python3 ~/.hermes/skills/productivity/google-workspace/scripts/google_api.py gmail search "from:<domain> newer_than:1d" --max 3`. Try each configured domain.
+2. If the search returns no results, do NOT conclude "no newsletter found" — retry once with just `newer_than:1d label:CATEGORY_UPDATES` and check whether any newsletter-type email arrived today before declaring the section empty.
 
 ### 3. Process images
 
