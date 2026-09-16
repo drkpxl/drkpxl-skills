@@ -1,8 +1,8 @@
 ---
 name: morning-briefing
 description: "Use when running the daily printable morning briefing."
-version: 2.0.0
-author: drkpxl
+version: 2.1.0
+author: Steven Hubert (drkpxl)
 license: MIT
 platforms: [macos, linux]
 metadata:
@@ -11,202 +11,118 @@ metadata:
     related_skills: [hermes-cron-automation]
 ---
 
-# Morning Briefing
+# Morning Briefing Skill
 
-A personal daily newspaper. Every morning, the agent gathers data from available sources, curates a single 8.5×11 page, renders it to PDF, and sends it to a network printer. The page is designed to be read over coffee — dense, scannable, and consistent.
-
-This is a rubric, not a rigid pipeline. The agent discovers what tools are available at runtime and uses what it finds. Sources degrade gracefully — each section renders or renders its own error text. No silent gaps.
+A personal daily newspaper: every morning the agent gathers weather, calendar, air quality, curated news, and newsletter summaries, renders a single 8.5×11 newsprint page, and prints it. Sources degrade gracefully — each section renders or renders its own error text. The skill is a rubric, not a pipeline: the agent discovers what tools exist at runtime. It does not do breaking-news alerts or full inbox triage.
 
 ## When to Use
 
-- Scheduled 6 AM cron run (daily)
-- User says "run my briefing", "print my morning briefing", "generate today's briefing"
-- Onboarding a new user: "set up morning briefing", "configure briefing skill"
+- Scheduled 6 AM cron run, or "run my briefing" / "print my morning briefing" / "generate today's briefing"
+- Onboarding: "set up morning briefing" / "configure briefing skill"
 
-Don't use for:
-- Breaking news alerts (that's a different workflow)
-- Full inbox triage (the briefing only scans known newsletter senders)
-- Weather-only queries (use HA tools directly)
+## Prerequisites
 
-## Architecture
+- **WeasyPrint** (`pip install weasyprint`) + pango/glib (`brew install pango glib` on macOS) — HTML→PDF rendering and page-count checks
+- **qrcode[pil]** and **Pillow** (`pip install "qrcode[pil]" Pillow`) — QR codes and radar image processing
+- **A CUPS printer** reachable via `lp` (`lpstat -p` lists names)
+- Optional, each section degrades gracefully without it: Home Assistant entities (weather, calendars, AQI), Gmail OAuth for newsletters, xAI OAuth for X search, tinyair MCP for AQI fallback, Tailscale for overflow pages
+- System Python 3.9 lacks the syntax some helper scripts need — run Python steps with the agent venv interpreter
 
-Full Hermes agent session. The value is curation and judgment — the agent decides what's worth reading, fits it on one page, and self-heals on source failures.
+## How to Run
 
-**No permanent scripts.** The skill contains no scripts directory. All Python scripts are throwaway — written to `/tmp/` at runtime by the agent, executed via `terminal`, then discarded. The skill is a rubric, not a codebase.
+Say "run my morning briefing" or trigger the cron job. The full procedure is in **Procedure** below; onboarding a new user follows `references/onboarding.md`.
 
-**Pipeline:** gather data → process images → write HTML → render PDF → check page count → trim if needed → print → notify on failure.
+**Cron job setup** (the run is a fresh agent session, so pin everything):
 
-The agent does everything with Hermes tools:
-- `ha_get_state` — weather, calendar, AQI
-- `x_search` — X/Twitter discussion
-- `web_search` — Hacker News, Reddit, news
-- `web_extract` — NWS forecast API
-- Gmail via `google_api.py` — newsletters
-- `write_file` — write HTML, write throwaway Python scripts
-- `terminal` — run Python scripts (image processing, PDF rendering), print via `lp`
+- Schedule `0 6 * * *`; toolsets `homeassistant`, `file`, `terminal`, `web`, `browser`
+- **Pin the model**: `hermes cron edit <job_id> --model <model> --provider <provider>` — an unpinned job inherits the global default and may land on a model that can't follow the skill
+- Deliver `local` — the printed page is the deliverable
 
-## Config
+## Quick Reference
 
-User-specific config lives in `~/.hermes/scripts/morning-briefing-config.json`. Onboarding creates this file. The agent reads it at the start of each run.
+Config lives at `~/.hermes/scripts/morning-briefing-config.json` (created by onboarding; read it first each run):
 
 | Setting | Purpose |
 |---|---|
 | weather_entity | HA weather entity ID |
-| calendar_entities | List of HA calendar entity IDs |
-| air_quality_entity | HA AQI sensor entity ID (or tinyair MCP) |
+| calendar_entities | List of HA calendar entity IDs — check ALL of them |
+| air_quality_entity | HA AQI sensor (or tinyair MCP fallback) |
 | printer_name | CUPS printer name |
 | location | Display name + news geo-filter |
-| news_topics | Interest profile — topics with keywords and descriptions |
-| newsletter_senders | Email addresses of newsletters to scan |
-| overflow_host | Tailscale hostname for overflow pages |
-| overflow_port | Port for overflow HTTP server |
-| overflow_dir | Directory for overflow HTML files |
+| news_topics | Interest profile: topic, keywords, interest_description, sources, subreddits |
+| newsletter_senders | Sender DOMAINS (addresses change — search by domain) |
 | notify_entity | HA notify entity for failure alerts |
+
+**Design system**: `references/design-system.md` holds the complete CSS stylesheet — copy it verbatim into the `<style>` block. The agent controls content, never design. Layout spec: `references/layout-spec.md`. Template skeleton: `templates/briefing.html`.
 
 ## Procedure
 
 ### 1. Read config
 
-Read `~/.hermes/scripts/morning-briefing-config.json` with `read_file`. If missing, run onboarding (see `references/onboarding.md`).
+`read_file` the config. If missing, run onboarding (`references/onboarding.md`). Get today's date via `terminal` — use it everywhere.
 
-### 2. Gather data sources
+### 2. Gather data
 
-Each source is independent. If one fails, attempt one self-healing retry, then render error text in that section. Never skip a section silently.
+Each source is independent; one self-healing retry, then render error text in that section. Never skip a section silently.
 
-**Weather** — `ha_get_state` for the configured weather entity. Extract: current temp, condition, humidity, wind speed/direction, visibility, pressure. Fetch the forecast (today's high/low, precipitation probability) via the NWS API at `https://api.weather.gov/gridpoints/<office>/<x>,<y>/forecast` using `web_extract` if the HA forecast service is unavailable.
+**Weather** — `ha_get_state` on the weather entity: temp, condition, humidity, wind, pressure. Forecast (today's high/low, precip) via the NWS API `https://api.weather.gov/gridpoints/<office>/<x>,<y>/forecast` with `web_extract` when the HA forecast service is unavailable.
 
-**Calendar** — `ha_get_state` for each configured calendar entity. Extract events for today only. Sort by start time. If no events, render "No events scheduled today."
+**Calendar** — `ha_get_state` for every configured calendar entity. Today's events only, sorted by start time. Empty renders "No events scheduled today."
 
-**Air quality** — `ha_get_state` for the AQI sensor. Extract: AQI value, category, PM2.5, PM10, O3. Alternatively, use tinyair MCP tools if HA sensor is unavailable.
+**Air quality** — `ha_get_state` on the AQI sensor; tinyair MCP tools as fallback.
 
-**News** — This is the curation step, the core value of the briefing. HARD RULE: every story must have happened or been first reported within the last 36 hours. This is a daily newspaper, not a weekly digest. A story with no verifiable publication date in the last 36 hours is cut — no exceptions, no matter how relevant the topic is.
+**News** — HARD RULE: every story must be published or first reported within the last 36 hours. No verifiable date, no story — no exceptions regardless of relevance. Include the story date in every source attribution.
 
-**Reddit RSS is the primary news source** because every post carries a machine-readable timestamp — the 36-hour rule is verifiable by construction, not by judgment. Fetch each configured subreddit's RSS feed with a throwaway Python script (urllib + a `User-Agent` header — Reddit returns 429/403 to headerless requests):
+Reddit RSS is the primary source (timestamped by construction): write a throwaway script to `/tmp/reddit_rss.py` that fetches each configured subreddit (`https://www.reddit.com/r/<sub>/new/.rss?limit=25` with a `User-Agent` header — headerless requests get 429/403), parses Atom (`a:entry`, `a:title`, `a:updated`, `a:link`), and filters to the last 36 hours. Fetch sequentially, save each feed to its own file, retry 429s after 30-60s.
 
-```
-https://www.reddit.com/r/<subreddit>/new/.rss?limit=25
-```
+Then per topic: `x_search` with explicit `from_date`/`to_date` (last 36 hours) and `web_search` with today's date in the query. Score against the interest profile; discard noise (pass-purchase chatter, gear advice, memes). A topic with nothing recent gets no stories — a thin news day is honest; stale news is not.
 
-Parse with ElementTree using the Atom namespace (`http://www.w3.org/2005/Atom`): entries at `a:entry`, title at `a:title`, timestamp at `a:updated`, link at `a:link` href. Filter to entries with `a:updated` within the last 36 hours, then score titles against the interest profile. Expect 429s on bursts — fetch feeds sequentially, save each feed to its own file, retry 429s after a 30-60s cooldown.
-
-1. For each topic in the interest profile, run targeted searches:
-   - Reddit RSS via terminal script (primary — timestamped)
-   - `x_search` with explicit `from_date`/`to_date` parameters set to the last 36 hours
-   - `web_search` with the current date and "past 24 hours" terms in the query (e.g., "yesterday" or today's date)
-2. For EVERY candidate item, determine its publication date from the search result metadata or the source page. If the date is older than 36 hours, DISCARD IT — do not include it, do not "round up" relevance.
-3. If a topic yields nothing in the last 36 hours, that topic gets no stories this run. Render the section with fewer items or skip that topic — a thin news day is honest; stale news is not.
-4. Score remaining candidates against the interest profile, rank by relevance + signal strength, discard noise (pass-purchase chatter, gear advice threads, memes — news and signal only).
-5. Select the top N items that will fit in the news section.
-6. For each selected item: write a 1-2 sentence summary with source attribution INCLUDING THE DATE (e.g., "Sep 16 — ...").
-
-**Verification before rendering:** re-check every selected story's date. If you cannot state when each story was published, you have not verified it — cut it. The date printed in each source attribution is the receipt.
-
-**Newsletters** — If Gmail is available and newsletter senders are configured:
-1. Search Gmail using the sender's DOMAIN, not the full email address — senders change delivery addresses (e.g., Morning Brew has sent from both `morningbrew@mail.sailthru.com` and `crew@morningbrew.com`). Search: `~/.hermes/hermes-agent/venv/bin/python3 ~/.hermes/skills/productivity/google-workspace/scripts/google_api.py gmail search "from:<domain> newer_than:1d" --max 3`. Try each configured domain.
-2. If the search returns no results, do NOT conclude "no newsletter found" — retry once with just `newer_than:1d label:CATEGORY_UPDATES` and check whether any newsletter-type email arrived today before declaring the section empty.
+**Newsletters** — search Gmail by sender DOMAIN (senders change delivery addresses): run `google_api.py` from the google-workspace skill via `terminal` — `gmail search "from:<domain> newer_than:1d"`, then `gmail get <id>` for the body. If nothing matches, retry with `newer_than:1d label:CATEGORY_UPDATES` before declaring none found. Summarize sections matching the interest profile; note the rest in one line.
 
 ### 3. Process images
 
-Two image processing steps, both done via throwaway Python scripts written to `/tmp/` with `write_file`, then run with `terminal` using the Hermes venv Python (`~/.hermes/hermes-agent/venv/bin/python3`).
+Throwaway scripts written to `/tmp/` with `write_file`, run via `terminal`:
 
-**Radar image** — Write a script to `/tmp/radar_process.py` that:
-- Fetches `https://radar.weather.gov/ridge/standard/<station>_0.gif`
-- Converts to RGB, crops ~33% centered on the user's location
-- Resizes to 140×128px
-- Outputs a base64 data URI string to stdout
+- **Radar**: fetch `https://radar.weather.gov/ridge/standard/<station>_0.gif`, convert RGB, crop ~33% centered on the user's area (storms arrive from the mountains — shift west on the Front Range), resize 140px wide, emit a base64 data URI
+- **QR codes**: one per story + newsletter, `qrcode` lib at `box_size=3, border=1`, base64 data URIs
 
-**QR codes** — Write a script to `/tmp/qr_gen.py` that:
-- Takes a list of URLs (hardcoded in the script)
-- Generates QR codes with the `qrcode` library
-- Outputs base64 data URIs to stdout
+### 4. Write the HTML
 
-### 4. Write the HTML page
+Assemble the page with all data, QR codes, and radar as base64 data URIs; `write_file` to `/tmp/briefing.html`. Copy the CSS from `references/design-system.md` verbatim. Key invariants: real HTML `<table>` elements (never flexbox — the PDF renderer doesn't support it); weather + calendar share one section (calendar nested under the weather columns, radar in the right cell spanning both); 2-column masonry news grid with QR on each card; lead story full width; joke of the day at the bottom, family-friendly; black and white except the color radar; serif body (Iowan Old Style/Palatino), sans-serif section headers.
 
-Assemble the complete HTML page with all data, QR codes, and radar image embedded as base64 data URIs. Write it to `/tmp/briefing.html` using `write_file`.
+### 5. Render and check page count
 
-**CRITICAL: Copy the CSS stylesheet from `references/design-system.md` verbatim into the `<style>` block.** Do not modify font sizes, QR code sizes, colors, or layout rules. The design system is a complete stylesheet — paste it as-is and fill in the content. The agent controls the content (which changes every run), not the design (which is fixed). If the QR codes are smaller than 45px they won't scan when printed.
-
-1. **Layout uses real HTML `<table>` elements** — not CSS flexbox (PDF renderer doesn't support flexbox).
-2. **Weather + Calendar share one section** — three weather columns in a table row, calendar nested below in the left cell, color radar in the right cell spanning both.
-3. **News uses a 2-column masonry grid** with per-story QR codes on the right.
-4. **Lead story** spans full width above the grid.
-5. **Newsletter section** after the news grid.
-6. **Joke of the Day** at the bottom, family-friendly.
-7. **All black and white** except the color radar image.
-8. **Serif body font** (Iowan Old Style/Palatino), sans-serif section headers (Helvetica).
-
-### 5. Render PDF and check page count
-
-Write a throwaway Python script to `/tmp/render_pdf.py` using `write_file` that:
-- Sets `os.environ['DYLD_LIBRARY_PATH'] = '/opt/homebrew/lib'` (macOS — pango/glib from Homebrew)
-- Imports weasyprint
-- Renders `/tmp/briefing.html` to `/tmp/briefing.pdf`
-- Prints the page count to stdout
-
-Run it with: `~/.hermes/hermes-agent/venv/bin/python3 /tmp/render_pdf.py`
-
-If page count > 1: trim the news section, re-write the HTML, re-render. Max 3 iterations.
+Write `/tmp/render_pdf.py` (sets `DYLD_LIBRARY_PATH=/opt/homebrew/lib` on macOS before importing weasyprint, renders `/tmp/briefing.html` → `/tmp/briefing.pdf`, prints page count) and run it. If >1 page: trim the lowest-ranked news, rewrite the HTML, re-render — max 3 iterations.
 
 ### 6. Print
 
-Send the PDF to the printer via `terminal`:
+`terminal`: `lp -d <printer_name> -o media=letter /tmp/briefing.pdf`. Verify exit 0 and a request ID. If the printer is unreachable, notify the user's preferred channel with a link to the rendered HTML.
 
-`lp -d <printer_name> -o media=letter /tmp/briefing.pdf`
+### 7. Cleanup and confirm
 
-Verify `lp` returns exit code 0 and a request ID.
+Leave `/tmp/briefing.html` and `/tmp/briefing.pdf` for debugging. Final response: one-line confirmation ending with a period.
 
-### 7. Failure handling
+## Pitfalls
 
-- **Printer unreachable** — Send a notification to the user's preferred channel with a link to the rendered HTML.
-- **Source failure** — After one retry, render error text in that section. Continue with other sources.
-- **Complete failure** — Send a notification with the error.
+1. **Inline Python is blocked in cron mode.** Never `python3 -c` or `execute_code` in a cron run — always `write_file` a script to `/tmp/` first, then run it via `terminal`. This is the #1 cause of cron failures.
+2. **Unpinned cron models fail.** An unpinned job rode the global default onto a weaker model that couldn't follow the skill and looped on blocked commands. Pin every job.
+3. **WeasyPrint needs DYLD_LIBRARY_PATH on macOS** (`/opt/homebrew/lib`), set before import, or pango/glib won't load.
+4. **No flexbox.** Real HTML `<table>` elements only — WeasyPrint's flexbox support is unreliable.
+5. **Page count check is mandatory.** Render and check every time; never assume it fits.
+6. **QR codes minimum 45px** (lead 50px) — smaller won't scan when printed. Base64 data URIs, not file paths.
+7. **Newsletter senders change addresses.** Store and search by DOMAIN; retry with `CATEGORY_UPDATES` before declaring none found.
+8. **Stale news backfills from memory.** Every story needs a verified date within 36 hours; the printed attribution date is the receipt. Reddit RSS makes this verifiable by construction.
+9. **Gmail helper needs Python 3.10+** — run `google_api.py` with the agent venv interpreter.
+10. **GLM models: end the cron response with a period** to avoid a false-positive truncation heuristic.
+11. **No permanent scripts in the skill** — everything is throwaway in `/tmp/`. The skill is a rubric, not a codebase.
 
-### 8. Cleanup
+## Verification
 
-- Leave rendered HTML and PDF in `/tmp/` for debugging
-- Final response: one-line confirmation ending with a period (avoids GLM stop-length false positive)
-
-## Onboarding
-
-See `references/onboarding.md` for the full interactive onboarding flow.
-
-## Cron Setup
-
-- **Schedule:** `0 6 * * *` (6 AM local time)
-- **Model:** pin explicitly with `hermes cron edit <job_id> --model <model> --provider <provider>` — never ride the global default
-- **Deliver:** `local` (the printed page IS the deliverable)
-- **Toolsets:** `homeassistant`, `file`, `terminal`, `web`, `browser`
-- **Prompt:** self-contained, references this skill, tells the agent to write scripts to /tmp/ and run them (never inline Python)
-
-## Common Pitfalls
-
-1. **CRITICAL: Inline Python is blocked in cron mode.** Never use `python3 -c` or `execute_code` in a cron job. Always `write_file` a script to `/tmp/` first, then run it with `terminal`. This is the #1 reason cron runs fail.
-
-2. **Pin the model on every cron job.** Use `hermes cron edit <job_id> --model <model> --provider <provider>`. If left null, the job inherits the global default, which may be a weaker model that can't follow the skill instructions.
-
-3. **WeasyPrint needs DYLD_LIBRARY_PATH on macOS.** Set `os.environ['DYLD_LIBRARY_PATH'] = '/opt/homebrew/lib'` at the top of any Python script that imports weasyprint.
-
-4. **Use real HTML `<table>` elements, not flexbox.** WeasyPrint does not support flexbox reliably. Tables render correctly every time.
-
-5. **Page count check is mandatory.** Always render to PDF and check the page count.
-
-6. **News curation is the product.** Don't dump search results. Score against the interest profile, discard noise, write concise summaries.
-
-7. **Each section renders or renders its error.** No blank spaces.
-
-8. **QR codes use base64 data URIs.** Embed as `data:image/png;base64,...` in the `<img src="...">`. Minimum rendered size: lead story 50px, grid cards 45px, newsletter 45px. Smaller than 45px won't scan reliably when printed.
-
-9. **Gmail newsletter scanning needs Python 3.10+.** Run `google_api.py` with `~/.hermes/hermes-agent/venv/bin/python3`.
-
-10. **GLM stop→length false positive.** End the cron response with a period.
-
-11. **No permanent scripts in the skill.** All scripts are throwaway — written to `/tmp/` at runtime. The skill is a rubric, not a codebase.
-
-## Verification Checklist
-
-- [ ] Config file exists at `~/.hermes/scripts/morning-briefing-config.json`
-- [ ] Every data source attempted; failures have error text in the rendered page
-- [ ] HTML written to `/tmp/briefing.html` with `write_file`
-- [ ] PDF rendered, page count verified as 1
-- [ ] `lp` returned exit code 0 with a request ID
-- [ ] Final response is a one-line confirmation ending with a period
+- [ ] Config read; today's date fetched via `terminal`
+- [ ] Every data source attempted; failures rendered as error text in their sections
+- [ ] Every news story dated within 36 hours; dates printed in source attributions
+- [ ] Newsletter search by domain, with CATEGORY_UPDATES fallback
+- [ ] HTML written with `write_file`; CSS copied verbatim from the design system
+- [ ] PDF rendered; page count verified 1
+- [ ] `lp` returned exit 0 with a request ID
+- [ ] Final response is one line ending with a period
