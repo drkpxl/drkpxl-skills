@@ -81,12 +81,21 @@ Each source is independent. If one fails, attempt one self-healing retry, then r
 
 **News** — This is the curation step, the core value of the briefing. HARD RULE: every story must have happened or been first reported within the last 36 hours. This is a daily newspaper, not a weekly digest. A story with no verifiable publication date in the last 36 hours is cut — no exceptions, no matter how relevant the topic is.
 
+**Reddit RSS is the primary news source** because every post carries a machine-readable timestamp — the 36-hour rule is verifiable by construction, not by judgment. Fetch each configured subreddit's RSS feed with a throwaway Python script (urllib + a `User-Agent` header — Reddit returns 429/403 to headerless requests):
+
+```
+https://www.reddit.com/r/<subreddit>/new/.rss?limit=25
+```
+
+Parse with ElementTree using the Atom namespace (`http://www.w3.org/2005/Atom`): entries at `a:entry`, title at `a:title`, timestamp at `a:updated`, link at `a:link` href. Filter to entries with `a:updated` within the last 36 hours, then score titles against the interest profile. Expect 429s on bursts — fetch feeds sequentially, save each feed to its own file, retry 429s after a 30-60s cooldown.
+
 1. For each topic in the interest profile, run targeted searches:
+   - Reddit RSS via terminal script (primary — timestamped)
    - `x_search` with explicit `from_date`/`to_date` parameters set to the last 36 hours
    - `web_search` with the current date and "past 24 hours" terms in the query (e.g., "yesterday" or today's date)
 2. For EVERY candidate item, determine its publication date from the search result metadata or the source page. If the date is older than 36 hours, DISCARD IT — do not include it, do not "round up" relevance.
 3. If a topic yields nothing in the last 36 hours, that topic gets no stories this run. Render the section with fewer items or skip that topic — a thin news day is honest; stale news is not.
-4. Score remaining candidates against the interest profile, rank by relevance + signal strength, discard noise.
+4. Score remaining candidates against the interest profile, rank by relevance + signal strength, discard noise (pass-purchase chatter, gear advice threads, memes — news and signal only).
 5. Select the top N items that will fit in the news section.
 6. For each selected item: write a 1-2 sentence summary with source attribution INCLUDING THE DATE (e.g., "Sep 16 — ...").
 
