@@ -19,6 +19,17 @@
       "keywords": ["plain-language", "jargon", "clarity", "output-style"]
     },
     {
+      "name": "colorado-traffic",
+      "source": "./",
+      "skills": ["./skills/colorado-traffic"],
+      "description": "Live Colorado road events from CDOT's public COtrip API. Default corridor is I-70 Golden to east Denver. No API key.",
+      "version": "1.1.0",
+      "category": "utilities",
+      "license": "MIT",
+      "repository": "https://github.com/drkpxl/drkpxl-skills",
+      "keywords": ["traffic", "cdot", "cotrip", "i-70", "colorado"]
+    },
+    {
       "name": "copywriting",
       "source": "./",
       "skills": ["./skills/copywriting"],

@@ -11,6 +11,7 @@ step, no API keys (unless noted), no backend to run.
 | Skill | Path | Description |
 |---|---|---|
 | **Bro** | [`skills/bro/`](skills/bro/) | Restates the agent's last message in plain human language, with no jargon. Manual invocation only — you decide when an answer needed translating. |
+| **Colorado Traffic** | [`skills/colorado-traffic/`](skills/colorado-traffic/) | Live Colorado road events from CDOT's public COtrip API. Default corridor is I-70 Golden to east Denver. No API key. |
 | **Copywriting** | [`skills/copywriting/`](skills/copywriting/) | Conversion copywriting for website pages (homepage, landing, pricing, feature, about). Finds where the copy lives and edits it in place — no copy dumped into chat. |
 | **Delegate to pi** | [`skills/delegate-to-pi/`](skills/delegate-to-pi/) | Hands a closed 8-slot packet (goal, decisions, file map, verify commands) to the `pi` CLI agent, then verifies the result. Pi executes; it does not re-explore. |
 | **Prototype** | [`skills/prototype/`](skills/prototype/) | Throwaway code that answers one design question: a single shareable HTML file for state/logic, or several toggleable UI variants on one route. Forked from [mattpocock/skills](https://github.com/mattpocock/skills). |
@@ -59,6 +60,7 @@ This repo is a Claude Code plugin marketplace — each skill installs as its own
 ```
 /plugin marketplace add drkpxl/drkpxl-skills
 /plugin install bro@drkpxl-skills
+/plugin install colorado-traffic@drkpxl-skills
 /plugin install copywriting@drkpxl-skills
 /plugin install delegate-to-pi@drkpxl-skills
 /plugin install prototype@drkpxl-skills
